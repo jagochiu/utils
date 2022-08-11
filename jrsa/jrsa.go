@@ -29,6 +29,34 @@ type JRSA struct {
 }
 
 /*
+PriDecrypt -
+*/
+func (r *JRSA) Set(k string, t KeyType) error {
+	keyBlock, err := stringCoverKeyBlock(k, t)
+	if err != nil {
+		log.Printf("%v \n", err)
+		return err
+	}
+	switch t {
+	case Private:
+		priKey, err := x509.ParsePKCS8PrivateKey(keyBlock.Bytes)
+		if err != nil {
+			log.Printf("%v \n", err)
+			return err
+		}
+		r.PriKey = priKey.(*rsa.PrivateKey)
+	case Public:
+		pubKey, err := x509.ParsePKIXPublicKey(keyBlock.Bytes)
+		if err != nil {
+			log.Printf("%v \n", err)
+			return err
+		}
+		r.PubKey = pubKey.(*rsa.PublicKey)
+	}
+	return nil
+}
+
+/*
 ------------------------------------------------------------------------------------------------------
 */
 
@@ -220,7 +248,6 @@ func stringCoverKeyBlock(keyString string, keyType KeyType) (*pem.Block, error) 
 		}
 	}
 	temp += string("\n-----END " + keyType + " KEY-----")
-
 	buff := bytes.NewBufferString(temp)
 	block, _ := pem.Decode(buff.Bytes())
 	if block == nil {
