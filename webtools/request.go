@@ -45,6 +45,9 @@ func SentRequest(url string, method string, data DataObj, headers map[string]str
 	}
 	timeout := time.Duration(15 * time.Second)
 	client := &http.Client{Timeout: timeout}
+	if data.Socket.Used {
+		client.Transport = Socks5Transport(data.Socket.Protocol, data.Socket.Host, data.Socket.Port)
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("URL:> ", url)
@@ -78,6 +81,7 @@ type HeaderType struct {
 DataType -
 */
 type DataObj struct {
-	Zip  string
-	Data string
+	Zip    string
+	Data   string
+	Socket Socket
 }
