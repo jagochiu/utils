@@ -48,6 +48,9 @@ func SentRequest(url string, method string, data DataObj, headers map[string]str
 	if data.Socket.Used {
 		client.Transport = Socks5Transport(data.Socket.Protocol, data.Socket.Host, data.Socket.Port)
 	}
+	if len(data.Auth.Username) > 0 || len(data.Auth.Password) > 0 {
+		req.SetBasicAuth(data.Auth.Username, data.Auth.Password)
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("URL:> ", url)
@@ -84,4 +87,10 @@ type DataObj struct {
 	Zip    string
 	Data   string
 	Socket Socket
+	Auth   AuthUser
+}
+
+type AuthUser struct {
+	Username string
+	Password string
 }
